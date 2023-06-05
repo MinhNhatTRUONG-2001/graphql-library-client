@@ -1,0 +1,1 @@
+export const notiTypeEnum = { ERROR: 'error', SUCCESS: 'success'}
