@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
-import { LOGIN } from '../GraphQLQueries'
+import { CURRENT_USER, LOGIN } from '../GraphQLQueries'
 import { notiTypeEnum } from '../NotiTypeEnum'
 
 const LoginForm = ({ setError, setToken }) => {
@@ -8,6 +8,7 @@ const LoginForm = ({ setError, setToken }) => {
   const [password, setPassword] = useState('')
 
   const [ login, result ] = useMutation(LOGIN, {
+    refetchQueries: { query: CURRENT_USER },
     onError: (error) => {
       setError(error.graphQLErrors[0].message, notiTypeEnum.ERROR)
     }

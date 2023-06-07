@@ -1,1 +1,1 @@
-export const notiTypeEnum = { ERROR: 'error', SUCCESS: 'success'}
+export const notiTypeEnum = { ERROR: 'error', SUCCESS: 'success', INFO: 'info'}

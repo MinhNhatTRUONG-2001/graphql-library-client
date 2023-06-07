@@ -18,6 +18,13 @@ const Notify = ({notification, type}) => {
         </div>
       )
     }
+    else if (type === notiTypeEnum.INFO) {
+      return (
+        <div style={{color: 'blue'}}>
+          {notification}
+        </div>
+      )
+    }
 }
 
 export default Notify

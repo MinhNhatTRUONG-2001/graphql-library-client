@@ -1,7 +1,8 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
-import { ADD_NEW_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../GraphQLQueries'
+import { ADD_NEW_BOOK, ALL_BOOKS } from '../GraphQLQueries'
 import { notiTypeEnum } from '../NotiTypeEnum'
+import { updateCache } from '../App'
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
@@ -16,12 +17,7 @@ const NewBook = (props) => {
       props.notify(error.graphQLErrors[0].message, notiTypeEnum.ERROR)
     },
     update: (cache, response) => {
-      cache.updateQuery([{ query: ALL_BOOKS }, {query: ALL_AUTHORS}], ({ allBooks, allAuthors }) => {
-        return {
-          allBooks: allBooks.concat(response.data.allBooks),
-          allAuthors: allAuthors.concat(response.data.allAuthors)
-        }
-      })
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook)
     }
   })
 

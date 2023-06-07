@@ -6,8 +6,27 @@ import Notify from './components/Notify'
 import LoginForm from './components/LoginForm'
 import Recommendations from './components/Recommendations'
 
-import { useApolloClient, useQuery } from "@apollo/client"
-import { ALL_AUTHORS, ALL_BOOKS, CURRENT_USER } from "./GraphQLQueries"
+import { useApolloClient, useQuery, useSubscription } from "@apollo/client"
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED, CURRENT_USER } from "./GraphQLQueries"
+import { notiTypeEnum } from './NotiTypeEnum'
+
+// function that takes care of manipulating cache
+export const updateCache = (cache, query, newBook) => {
+  // helper that is used to eliminate saving same person twice
+  const uniqueByTitle = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.title
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqueByTitle(allBooks.concat(newBook)),
+    }
+  })
+}
 
 const App = () => {
   const [token, setToken] = useState(null)
@@ -20,6 +39,14 @@ const App = () => {
   const allAuthorsResult = useQuery(ALL_AUTHORS)
   const allBooksResult = useQuery(ALL_BOOKS)
   const currentUserResult = useQuery(CURRENT_USER)
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const newBook = data.data.bookAdded
+      notify(`New book: ${newBook.title} by ${newBook.author.name} was added.`, notiTypeEnum.INFO)
+      updateCache(client.cache, { query: ALL_BOOKS }, newBook)
+    }
+  })
   
   const notify = (message, type) => {
     setNotification(message)
@@ -33,7 +60,7 @@ const App = () => {
   const logout = () => {
     setToken(null)
     localStorage.clear()
-    client.resetStore()
+    client.clearStore()
   }
 
   if (!token) {
